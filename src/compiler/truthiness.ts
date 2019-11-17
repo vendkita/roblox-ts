@@ -511,7 +511,7 @@ function evaluateNestedExpressions9(
 
 /**
  * Moment of truthy >:)
- * Not perfect, but it works. We can make a better implementation for the intermediary AST version.
+ * Not perfect, but good.
  */
 function evaluateNestedExpressions(
 	state: CompilerState,
@@ -544,13 +544,27 @@ function evaluateNestedExpressions(
 		while (i < nestedExpressions.exprs.length && isCompileDataBooly(compileData)) {
 			const { [i]: next } = nestedExpressions.exprs;
 			if (canShorten(next)) {
-				expStrs.push(shorten(next));
+				const short = shorten(next);
+				expStrs.push(short);
 				i++;
 				item = { compileData } = next;
 			} else {
 				break;
 			}
 		}
+
+		// TODO: This can be used once we add logic for skipping the first node
+		// while properly maintaining trailing if statements
+		// a() || (b() && (c() && (d() || (x = e()) || (f() || g())))) || ((h() && i()) || j());
+		// d() can be pulled into the c(), even if to the right of d() it isn't shorten-able
+		// let pushedNext = false;
+		// if (i + 1 === nestedExpressions.exprs.length && isCompileDataBooly(compileData)) {
+		// 	const next = getNext(nestedExpressions, i);
+		// 	if (next && canShorten(next)) {
+		// 		expStrs.push(shorten(next));
+		// 		pushedNext = true;
+		// 	}
+		// }
 
 		if (expStrs.length) {
 			if (!logicalState.isIdUnused && firstItem.isMeta) {
@@ -607,8 +621,10 @@ function evaluateNestedExpressions(
 	return logicalState.id;
 }
 
-// const evaluateNestedCheckedExpressions = evaluateNestedExpressions;
-
+/**
+ * For this case, we don't need to preserve intermediate values.
+ * We should always end up evaluating to a boolean.
+ */
 function evaluateNestedCheckedExpressions(
 	state: CompilerState,
 	logicalState: LogicalBinaryState,
