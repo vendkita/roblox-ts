@@ -54,13 +54,15 @@ export function transformArrayBindingLiteral(
 				if (initializer) {
 					state.prereq(transformInitializer(state, id, initializer));
 				}
-				transformArrayBindingLiteral(state, element, id, getSubType(state, accessType, index));
+				// FIXME: wrong side node is passed to getSubType as 4th argument
+				transformArrayBindingLiteral(state, element, id, getSubType(state, accessType, index, bindingLiteral));
 			} else if (ts.isObjectLiteralExpression(element)) {
 				const id = state.pushToVar(value, "binding");
 				if (initializer) {
 					state.prereq(transformInitializer(state, id, initializer));
 				}
-				transformObjectBindingLiteral(state, element, id, getSubType(state, accessType, index));
+				// FIXME: wrong side node is passed to getSubType as 4th argument
+				transformObjectBindingLiteral(state, element, id, getSubType(state, accessType, index, bindingLiteral));
 			} else {
 				assert(false);
 			}

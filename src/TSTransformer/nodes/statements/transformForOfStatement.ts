@@ -57,7 +57,7 @@ function makeForLoopBuilder(
 function getForInitializerAccessType(state: TransformState, initializer: ts.ForInitializer) {
 	const forOfStatement = initializer.parent;
 	assert(ts.isForOfStatement(forOfStatement));
-	return getSubType(state, state.getType(forOfStatement.expression), 0);
+	return getSubType(state, state.getType(forOfStatement.expression), 0, initializer);
 }
 
 function transformForInitializerExpressionDirect(
@@ -422,21 +422,21 @@ const buildGeneratorLoop: LoopBuilder = makeForLoopBuilder((state, initializer, 
 });
 
 function getLoopBuilder(state: TransformState, node: ts.Node, type: ts.Type): LoopBuilder {
-	if (isDefinitelyType(type, isArrayType(state))) {
+	if (isDefinitelyType(type, node, isArrayType(state))) {
 		return buildArrayLoop;
-	} else if (isDefinitelyType(type, isSetType(state))) {
+	} else if (isDefinitelyType(type, node, isSetType(state))) {
 		return buildSetLoop;
-	} else if (isDefinitelyType(type, isMapType(state))) {
+	} else if (isDefinitelyType(type, node, isMapType(state))) {
 		return buildMapLoop;
-	} else if (isDefinitelyType(type, t => isStringType(t))) {
+	} else if (isDefinitelyType(type, node, t => isStringType(t))) {
 		return buildStringLoop;
-	} else if (isDefinitelyType(type, isIterableFunctionLuaTupleType(state))) {
+	} else if (isDefinitelyType(type, node, isIterableFunctionLuaTupleType(state))) {
 		return buildIterableFunctionLuaTupleLoop(type);
-	} else if (isDefinitelyType(type, isIterableFunctionType(state))) {
+	} else if (isDefinitelyType(type, node, isIterableFunctionType(state))) {
 		return buildIterableFunctionLoop;
-	} else if (isDefinitelyType(type, isGeneratorType(state))) {
+	} else if (isDefinitelyType(type, node, isGeneratorType(state))) {
 		return buildGeneratorLoop;
-	} else if (isDefinitelyType(type, isIterableType(state))) {
+	} else if (isDefinitelyType(type, node, isIterableType(state))) {
 		DiagnosticService.addDiagnostic(errors.noIterableIteration(node));
 		return () => luau.list.make();
 	} else if (type.isUnion()) {

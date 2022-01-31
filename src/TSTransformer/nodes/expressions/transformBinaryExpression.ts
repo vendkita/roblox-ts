@@ -64,7 +64,13 @@ function transformLuaTupleDestructure(
 					if (initializer) {
 						state.prereq(transformInitializer(state, id, initializer));
 					}
-					transformArrayBindingLiteral(state, element, id, getSubType(state, accessType, index));
+					transformArrayBindingLiteral(
+						state,
+						element,
+						id,
+						// FIXME: wrong side node is passed as 4th argument
+						getSubType(state, accessType, index, bindingLiteral),
+					);
 				} else if (ts.isObjectLiteralExpression(element)) {
 					const id = luau.tempId("binding");
 					luau.list.push(variables, id);
@@ -72,7 +78,13 @@ function transformLuaTupleDestructure(
 					if (initializer) {
 						state.prereq(transformInitializer(state, id, initializer));
 					}
-					transformObjectBindingLiteral(state, element, id, getSubType(state, accessType, index));
+					transformObjectBindingLiteral(
+						state,
+						element,
+						id,
+						// FIXME: wrong side node is passed as 4th argument
+						getSubType(state, accessType, index, bindingLiteral),
+					);
 				} else {
 					assert(false);
 				}
@@ -172,7 +184,12 @@ export function transformBinaryExpression(state: TransformState, node: ts.Binary
 
 		const writableType = state.getType(node.left);
 		const valueType = state.getType(node.right);
-		const operator = getSimpleAssignmentOperator(writableType, operatorKind as ts.AssignmentOperator, valueType);
+		const operator = getSimpleAssignmentOperator(
+			writableType,
+			operatorKind as ts.AssignmentOperator,
+			valueType,
+			node,
+		);
 		const { writable, readable, value } = transformWritableAssignment(
 			state,
 			node.left,
@@ -185,7 +202,7 @@ export function transformBinaryExpression(state: TransformState, node: ts.Binary
 				state,
 				writable,
 				operator,
-				operator === "..=" && !isDefinitelyType(valueType, isStringType)
+				operator === "..=" && !isDefinitelyType(valueType, node.right, isStringType)
 					? luau.call(luau.globals.tostring, [value])
 					: value,
 			);
@@ -228,8 +245,10 @@ export function transformBinaryExpression(state: TransformState, node: ts.Binary
 		operatorKind === ts.SyntaxKind.GreaterThanEqualsToken
 	) {
 		if (
-			(!isDefinitelyType(leftType, isStringType) && !isDefinitelyType(leftType, isNumberType)) ||
-			(!isDefinitelyType(rightType, isStringType) && !isDefinitelyType(leftType, isNumberType))
+			(!isDefinitelyType(leftType, node.left, isStringType) &&
+				!isDefinitelyType(leftType, node.left, isNumberType)) ||
+			(!isDefinitelyType(rightType, node.right, isStringType) &&
+				!isDefinitelyType(leftType, node.left, isNumberType))
 		) {
 			DiagnosticService.addDiagnostic(errors.noNonNumberStringRelationOperator(node));
 		}

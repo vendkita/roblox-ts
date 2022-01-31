@@ -8,8 +8,9 @@ export function addOneIfArrayType(
 	state: TransformState,
 	type: ts.Type | ReadonlyArray<ts.Type>,
 	expression: luau.Expression,
+	originNode: ts.Node,
 ) {
-	if (ts.isArray(type) || isDefinitelyType(type, isArrayType(state), isUndefinedType)) {
+	if (ts.isArray(type) || isDefinitelyType(type, originNode, isArrayType(state), isUndefinedType)) {
 		return offset(expression, 1);
 	} else {
 		return expression;
