@@ -64,7 +64,7 @@ export function transformObjectBindingLiteral(
 					state.prereq(transformInitializer(state, id, initializer));
 				}
 				assert(ts.isIdentifier(name));
-				// FIXME: wrong side node is passed to getSubType as 4th argument
+				// FIXME: wrong side of assignment is passed to getSubType as 4th argument
 				transformArrayBindingLiteral(state, init, id, getSubType(state, accessType, name.text, bindingLiteral));
 			} else if (ts.isObjectLiteralExpression(init)) {
 				const id = state.pushToVar(value, "binding");
@@ -72,11 +72,11 @@ export function transformObjectBindingLiteral(
 					state.prereq(transformInitializer(state, id, initializer));
 				}
 				assert(ts.isIdentifier(name));
-				// FIXME: wrong side node is passed to getSubType as 4th argument
 				transformObjectBindingLiteral(
 					state,
 					init,
 					id,
+					// FIXME: wrong side of assignment is passed as 4th argument
 					getSubType(state, accessType, name.text, bindingLiteral),
 				);
 			} else {

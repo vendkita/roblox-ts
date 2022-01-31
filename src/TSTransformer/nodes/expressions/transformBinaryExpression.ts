@@ -68,7 +68,7 @@ function transformLuaTupleDestructure(
 						state,
 						element,
 						id,
-						// FIXME: wrong side node is passed as 4th argument
+						// FIXME: wrong side of assignment is passed as 4th argument
 						getSubType(state, accessType, index, bindingLiteral),
 					);
 				} else if (ts.isObjectLiteralExpression(element)) {
@@ -82,7 +82,7 @@ function transformLuaTupleDestructure(
 						state,
 						element,
 						id,
-						// FIXME: wrong side node is passed as 4th argument
+						// FIXME: wrong side of assignment is passed as 4th argument
 						getSubType(state, accessType, index, bindingLiteral),
 					);
 				} else {
